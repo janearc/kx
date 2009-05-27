@@ -55,10 +55,6 @@ class Menu {
 		}
 		$dwoo_data->assign('boards', $sections);
 
-		$tpl_irc = '';
-
-		$dwoo_data->assign('irc', $tpl_irc);
-
 		for ($i = 0; $i < 2; $i++) {
 			if ($i == 0) $dwoo_data->assign('showdirs', 0);
 			else $dwoo_data->assign('showdirs', 1);

@@ -36,7 +36,7 @@
 {if %KU_STYLESWITCHER}
 	{if %KU_DROPSWITCHER}
 		<select onchange="javascript:if(selectedIndex != 0)set_stylesheet(options[selectedIndex].value);return false;">
-			<option>Styles</option>
+			<option>{t}Styles{/t}</option>
 		{loop $ku_styles}
 			<option value="{$|capitalize}">{$|capitalize}</option>;
 		{/loop}

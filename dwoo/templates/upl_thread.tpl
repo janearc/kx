@@ -5,6 +5,7 @@
 	{foreach key=postkey item=post from=$posts name=postsloop}
 	
 		{if $post.parentid eq 0}
+		<div id="thread{$post.id}{$board.name}">
 			<a name="s{$.foreach.thread.iteration}"></a>
 			
 			{if ($post.file neq '' || $post.file_type neq '' ) && (( $post.videobox eq '' && $post.file neq '') && $post.file neq 'removed')}
