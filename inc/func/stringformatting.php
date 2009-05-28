@@ -199,7 +199,12 @@ function formatLongMessage($message, $board, $threadid, $page) {
 			$message_shortened = substr($message_shortened, 0, KU_LINELENGTH);
 		}
 		$message_shortened = closeOpenTags($message_shortened);
-
+		
+		if (strrpos($message_shortened,"<") > strrpos($message_shortened,">")) {
+			//We have a partially opened tag we need to get rid of.
+			$message_shortened = substr($message_shortened, 0, strrpos($message_shortened,"<"));
+		}
+		
 		$output = $message_shortened . '<div class="abbrev">' . "\n" .
 		'	' . sprintf(_gettext('Message too long. Click %shere%s to view the full text.'), '<a href="' . KU_BOARDSFOLDER . $board . '/res/' . $threadid . '.html">', '</a>') . "\n" .
 		'</div>' . "\n";

@@ -29,7 +29,7 @@ class Parse {
 	
 	function MakeClickable($txt) {
 		/* Make http:// urls in posts clickable */
-		$txt = preg_replace('#(http://|https://|ftp://)([^(\s<)]*)#', '<a href="\\1\\2">\\1\\2</a>', $txt);
+		$txt = preg_replace('#(http://|https://|ftp://)([^(\s<|\[)]*)#', '<a href="\\1\\2">\\1\\2</a>', $txt);
 		
 		return $txt;
 	} 
