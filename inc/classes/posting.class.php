@@ -316,7 +316,7 @@ class Posting {
 		foreach ($badlinks as $badlink) {
 			if (stripos($_POST['message'], $badlink) !== false) {
 				/* They included a blacklisted link in their post. Ban them for an hour */
-				$bans_class->BanUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, 3600, '', $tc_db->qstr(_gettext('Posting a blacklisted link.') . ' (' . $badlink . ')'), $tc_db->qstr($_POST['message']));
+				$bans_class->BanUser($_SERVER['REMOTE_ADDR'], 'board.php', 1, 3600, '', _gettext('Posting a blacklisted link.') . ' (' . $badlink . ')', $_POST['message']);
 				exitWithErrorPage(sprintf(_gettext('Blacklisted link ( %s ) detected.'), $badlink));
 			}
 		}
