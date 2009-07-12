@@ -193,8 +193,8 @@ CREATE TABLE PREFIX_front (
 	subject varchar(255) NOT NULL,
 	message text NOT NULL,
 	timestamp int NOT NULL default '0',
-	poster varchar(75) NOT NULL,
-	email varchar(255) NOT NULL,
+	poster varchar(75) NOT NULL default '',
+	email varchar(255) NOT NULL default '',
 	PRIMARY KEY (id)
 );
 

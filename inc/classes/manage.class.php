@@ -566,7 +566,7 @@ class Manage {
 		if(isset($_GET['act'])) {
 			if ($_GET['act'] == 'edit') {
 				if (isset($_POST['faq'])) {
-					$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "front` SET `subject` = " . $tc_db->qstr($_POST['heading']) . ", `message` = " . $tc_db->qstr($_POST['faq']) . ", `order` = " . $tc_db->qstr($_POST['order']) . " WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
+					$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "front` SET `subject` = " . $tc_db->qstr($_POST['heading']) . ", `message` = " . $tc_db->qstr($_POST['faq']) . ", `order` = " . intval($_POST['order']) . " WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
 					$tpl_page .= '<hr /><h3>'. _gettext('FAQ entry edited') .'</h3><hr />';
 					management_addlogentry(_gettext('Edited a FAQ entry'), 9);
 				}
@@ -582,7 +582,7 @@ class Manage {
 				if (isset($_POST['faq']) && isset($_POST['heading']) && isset($_POST['order'])) {
 					if (!empty($_POST['faq']) || !empty($_POST['heading'])) {
 						$tpl_page .= '<hr />';
-						$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `subject` , `message` , `order` ) VALUES ( '1', " . $tc_db->qstr($_POST['heading']) . " , " . $tc_db->qstr($_POST['faq']) . " , " . $tc_db->qstr($_POST['order']) . " )");
+						$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `subject` , `message` , `order` ) VALUES ( '1', " . $tc_db->qstr($_POST['heading']) . " , " . intval($_POST['faq']) . " , " . intval($_POST['order']) . " )");
 						$tpl_page .= '<h3>'. _gettext('FAQ entry successfully added.') . '</h3>';
 						management_addlogentry(_gettext('Added a FAQ entry'), 9);
 						$tpl_page .= '<hr />';
@@ -627,7 +627,7 @@ class Manage {
 		if(isset($_GET['act'])) {
 			if ($_GET['act'] == 'edit') {
 				if (isset($_POST['rules'])) {
-					$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "front` SET `subject` = " . $tc_db->qstr($_POST['heading']) . ", `message` = " . $tc_db->qstr($_POST['rules']) . ", `order` = " . $tc_db->qstr($_POST['order']) . " WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
+					$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "front` SET `subject` = " . $tc_db->qstr($_POST['heading']) . ", `message` = " . $tc_db->qstr($_POST['rules']) . ", `order` = " . intval($_POST['order']) . " WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
 					$tpl_page .= '<hr /><h3>'. _gettext('Rules entry edited') .'</h3><hr />';
 					management_addlogentry(_gettext('Edited a Rule entry'), 9);
 				}
@@ -643,7 +643,7 @@ class Manage {
 				if (isset($_POST['rules']) && isset($_POST['heading']) && isset($_POST['order'])) {
 					if (!empty($_POST['rules']) || !empty($_POST['heading'])) {
 						$tpl_page .= '<hr />';
-						$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `subject` , `message` , `order` ) VALUES ( '2', " . $tc_db->qstr($_POST['heading']) . " , " . $tc_db->qstr($_POST['rules']) . " , " . $tc_db->qstr($_POST['order']) . " )");
+						$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `subject` , `message` , `order` ) VALUES ( '2', " . $tc_db->qstr($_POST['heading']) . " , " . $tc_db->qstr($_POST['rules']) . " , " . intval($_POST['order']) . " )");
 						$tpl_page .= '<h3>'. _gettext('Rules entry successfully added.') . '</h3>';
 						management_addlogentry(_gettext('Added a Rule entry'), 9);
 						$tpl_page .= '<hr />';

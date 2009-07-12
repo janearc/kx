@@ -91,7 +91,7 @@ class Bans {
 			$ban_until = '0';
 		}
 
-		$tc_db->Execute("INSERT INTO `".KU_DBPREFIX."banlist` ( `ip` , `ipmd5` , `type` , `allowread` , `globalban` , `boards` , `by` , `at` , `until` , `reason`, `staffnote`, `appealat` ) VALUES ( ".$tc_db->qstr(md5_encrypt($ip, KU_RANDOMSEED))." , ".$tc_db->qstr(md5($ip))." , ".intval($type)." , ".intval($allowread)." , ".intval($globalban)." , ".$tc_db->qstr($boards)." , ".$tc_db->qstr($modname)."' , ".time()." , ".intval($ban_until)." , ".$tc_db->qstr($reason)." , ".$tc_db->qstr($staffnote).", ".intval($appealat)." ) ");
+		$tc_db->Execute("INSERT INTO `".KU_DBPREFIX."banlist` ( `ip` , `ipmd5` , `type` , `allowread` , `globalban` , `boards` , `by` , `at` , `until` , `reason`, `staffnote`, `appealat` ) VALUES ( ".$tc_db->qstr(md5_encrypt($ip, KU_RANDOMSEED))." , ".$tc_db->qstr(md5($ip))." , ".intval($type)." , ".intval($allowread)." , ".intval($globalban)." , ".$tc_db->qstr($boards)." , ".$tc_db->qstr($modname)." , ".time()." , ".intval($ban_until)." , ".$tc_db->qstr($reason)." , ".$tc_db->qstr($staffnote).", ".intval($appealat)." ) ");
 
 		if (!$proxyban && $type == 1) {
 			$this->UpdateHtaccess();
