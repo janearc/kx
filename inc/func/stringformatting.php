@@ -99,7 +99,7 @@ function formatReflink($post_board, $post_thread_start_id, $post_id, $locale = '
 function calculateNameAndTripcode($post_name) {
 	global $tc_db;
 
-	if(ereg("(#|!)(.*)", $post_name, $regs)){
+	if(preg_match("/(#|!)(.*)/", $post_name, $regs)){
 		$cap = $regs[2];
 		$cap_full = '#' . $regs[2];
 
@@ -109,7 +109,7 @@ function calculateNameAndTripcode($post_name) {
 		if (count($trips) > 0) {
 			if (isset($trips[$cap_full])) {
 				$forcedtrip = $trips[$cap_full];
-				return array(ereg_replace("(#)(.*)", "", $post_name), $forcedtrip);
+				return array(preg_replace("/(#)(.*)/", "", $post_name), $forcedtrip);
 			}
 		}
 
@@ -130,7 +130,7 @@ function calculateNameAndTripcode($post_name) {
 			$cap_delimiter = (strpos($post_name, '#') < strpos($post_name, '!')) ? '#' : '!';
 		}
 
-		if (ereg("(.*)(" . $cap_delimiter . ")(.*)", $cap, $regs_secure)) {
+		if (preg_match("/(.*)(" . $cap_delimiter . ")(.*)/", $cap, $regs_secure)) {
 			$cap = $regs_secure[1];
 			$cap_secure = $regs_secure[3];
 			$is_secure_trip = true;
@@ -144,7 +144,7 @@ function calculateNameAndTripcode($post_name) {
 			$cap = strtr($cap, "&amp;", "&");
 			$cap = strtr($cap, "&#44;", ", ");
 			$salt = substr($cap."H.", 1, 2);
-			$salt = ereg_replace("[^\.-z]", ".", $salt);
+			$salt = preg_replace("/[^\.-z]/", ".", $salt);
 			$salt = strtr($salt, ":;<=>?@[\\]^_`", "ABCDEFGabcdef");
 			$tripcode = substr(crypt($cap, $salt), -10);
 		}
@@ -167,7 +167,7 @@ function calculateNameAndTripcode($post_name) {
 			$tripcode .= '!' . $secure_tripcode;
 		}
 
-		$name = ereg_replace("(" . $cap_delimiter . ")(.*)", "", $post_name);
+		$name = preg_replace("/(" . $cap_delimiter . ")(.*)/", "", $post_name);
 
 
 		return array($name, $tripcode);
