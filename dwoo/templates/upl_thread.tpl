@@ -235,7 +235,7 @@
 							<img style="border: 0;" src="{$boardpath}css/sticky.gif" alt="{t}Stickied{/t}" />
 						{/if}
 						</span>
-						<span id="dnb-{$board.name}-{$post.id}-n"></span>	
+						<span id="dnb-{$board.name}-{$post.id}-n"></span>
 						{if ($post.file neq '' || $post.file_type neq '' ) && (( $post.videobox eq '' && $post.file neq '') && $post.file neq 'removed')}
 							<br /><span class="filesize">
 							{if $post.file_type eq 'mp3'}
