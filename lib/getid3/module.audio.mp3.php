@@ -1548,7 +1548,7 @@ class getid3_mp3
 						if ($pct_data_scanned > 0) {
 							$ThisFileInfo['warning'][] = 'too many MPEG audio frames to scan, only scanned '.$frames_scanned.' frames in '.$max_scan_segments.' segments ('.number_format($pct_data_scanned * 100, 1).'% of file) and extrapolated distribution, playtime and bitrate may be incorrect.';
 							foreach ($ThisFileInfo['mpeg']['audio'] as $key1 => $value1) {
-								if (!eregi('_distribution$', $key1)) {
+								if (!preg_match('/_distribution$/i', $key1)) {
 									continue;
 								}
 								foreach ($value1 as $key2 => $value2) {

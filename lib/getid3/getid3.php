@@ -60,7 +60,7 @@ class getID3
 
 		// Check memory
 		$memory_limit = ini_get('memory_limit');
-		if (eregi('([0-9]+)M', $memory_limit, $matches)) {
+		if (preg_match('/([0-9]+)[Mm]/', $memory_limit, $matches)) {
 			// could be stored as "16M" rather than 16777216 for example
 			$memory_limit = $matches[1] * 1048576;
 		}
@@ -179,9 +179,14 @@ class getID3
 		// Disable magic_quotes_runtime, if neccesary
 		$old_magic_quotes_runtime = get_magic_quotes_runtime(); // store current setting of magic_quotes_runtime
 		if ($old_magic_quotes_runtime) {
-			set_magic_quotes_runtime(0);						// turn off magic_quotes_runtime
-			if (get_magic_quotes_runtime()) {
-				return $this->error('Could not disable magic_quotes_runtime - getID3() cannot work properly with this setting enabled');
+			if (version_compare(phpversion(), "5.3") === -1) {
+				set_magic_quotes_runtime(0);						// turn off magic_quotes_runtime
+				if (get_magic_quotes_runtime()) {
+					return $this->error('Could not disable magic_quotes_runtime - getID3() cannot work properly with this setting enabled');
+				}
+			}
+			else {
+				return $this->error('Magic quotes are depricated in PHP 5.3 - getID3() will not operate with PHP 5.3 installed and magic quotes enabled.');
 			}
 		}
 
@@ -216,13 +221,13 @@ class getID3
 					if (GETID3_OS_ISWINDOWS) {
 						$commandline = 'dir /-C "'.str_replace('/', DIRECTORY_SEPARATOR, $filename).'"';
 						$dir_output = `$commandline`;
-						if (eregi('1 File\(s\)[ ]+([0-9]+) bytes', $dir_output, $matches)) {
+						if (preg_match('/1 File\(s\)[ ]+([0-9]+) bytes/i', $dir_output, $matches)) {
 							$real_filesize = (float) $matches[1];
 						}
 					} else {
 						$commandline = 'ls -o -g -G --time-style=long-iso '.escapeshellarg($filename);
 						$dir_output = `$commandline`;
-						if (eregi('([0-9]+) ([0-9]{4}-[0-9]{2}\-[0-9]{2} [0-9]{2}:[0-9]{2}) '.preg_quote($filename).'$', $dir_output, $matches)) {
+						if (preg_match('/([0-9]+) ([0-9]{4}-[0-9]{2}\-[0-9]{2} [0-9]{2}:[0-9]{2}) /i'.preg_quote($filename).'$', $dir_output, $matches)) {
 							$real_filesize = (float) $matches[1];
 						}
 					}
@@ -408,7 +413,7 @@ class getID3
 		$this->CleanUp();
 
 		// restore magic_quotes_runtime setting
-		set_magic_quotes_runtime($old_magic_quotes_runtime);
+		if ($old_magic_quotes_runtime) set_magic_quotes_runtime($old_magic_quotes_runtime);
 
 		// return info array
 		return $this->info;
