@@ -48,7 +48,7 @@ CREATE TABLE `PREFIX_banlist` (
   `until` int(20) NOT NULL,
   `reason` text NOT NULL,
   `staffnote` text NOT NULL,
-  `appeal` text NOT NULL default '',
+  `appeal` text,
   `appealat` int(20) NOT NULL default '0',
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
