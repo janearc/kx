@@ -105,7 +105,7 @@ CREATE TABLE `PREFIX_boards` (
   `messagelength` int(10) NOT NULL default '8192',
   `createdon` int(20) NOT NULL,
   `locked` tinyint(1) NOT NULL default '0',
-  `includeheader` text collate utf8_unicode_ci NOT NULL default '',
+  `includeheader` text collate utf8_unicode_ci NOT NULL,
   `redirecttothread` tinyint(1) NOT NULL default '0',
   `anonymous` varchar(255) collate utf8_unicode_ci NOT NULL default 'Anonymous',
   `forcedanon` tinyint(1) NOT NULL default '0',

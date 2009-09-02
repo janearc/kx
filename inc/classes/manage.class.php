@@ -1164,7 +1164,7 @@ class Manage {
 						if ($_POST['firstpostid'] < 1) {
 							$_POST['firstpostid'] = 1;
 						}
-						$tc_db->Execute("INSERT INTO `" . KU_DBPREFIX . "boards` ( `name` , `desc` , `createdon`, `start`, `image` ) VALUES ( " . $tc_db->qstr($dir) . " , " . $tc_db->qstr($desc) . " , '" . time() . "', " . $_POST['firstpostid'] . ", '' )");
+						$tc_db->Execute("INSERT INTO `" . KU_DBPREFIX . "boards` ( `name` , `desc` , `createdon`, `start`, `image`, `includeheader` ) VALUES ( " . $tc_db->qstr($dir) . " , " . $tc_db->qstr($desc) . " , '" . time() . "', " . $_POST['firstpostid'] . ", '', '' )");
 						$boardid = $tc_db->Insert_Id();
 						$filetypes = $tc_db->GetAll("SELECT " . KU_DBPREFIX . "filetypes.id FROM " . KU_DBPREFIX . "filetypes WHERE " . KU_DBPREFIX . "filetypes.filetype = 'JPG' OR " . KU_DBPREFIX . "filetypes.filetype = 'GIF' OR " . KU_DBPREFIX . "filetypes.filetype = 'PNG';");
 						foreach ($filetypes AS $filetype) {
