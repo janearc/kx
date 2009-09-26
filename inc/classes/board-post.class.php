@@ -95,21 +95,20 @@ class Board {
 				if($this->board['type'] != 1) {
 					$this->board['filetypes_allowed'] = $tc_db->GetAll("SELECT ".KU_DBPREFIX."filetypes.filetype FROM ".KU_DBPREFIX."boards, ".KU_DBPREFIX."filetypes, ".KU_DBPREFIX."board_filetypes WHERE ".KU_DBPREFIX."boards.id = " . $this->board['id'] . " AND ".KU_DBPREFIX."board_filetypes.boardid = " . $this->board['id'] . " AND ".KU_DBPREFIX."board_filetypes.typeid = ".KU_DBPREFIX."filetypes.id ORDER BY ".KU_DBPREFIX."filetypes.filetype ASC;");
 				}
-
-				$this->board['loadbalanceurl_formatted'] = ($this->board['loadbalanceurl'] != '') ? substr($this->board['loadbalanceurl'], 0, strrpos($this->board['loadbalanceurl'], '/')) : '';
-
-				if ($this->board['loadbalanceurl'] != '' && $this->board['loadbalancepassword'] != '') {
-					require_once KU_ROOTDIR . 'inc/classes/loadbalancer.class.php';
-					$this->loadbalancer = new Load_Balancer;
-
-					$this->loadbalancer->url = $this->board['loadbalanceurl'];
-					$this->loadbalancer->password = $this->board['loadbalancepassword'];
-				}
+				
 				if ($this->board['locale'] && $this->board['locale'] != KU_LOCALE) {
 					changeLocale($this->board['locale']);
 				}
 			}
+			$this->board['loadbalanceurl_formatted'] = ($this->board['loadbalanceurl'] != '') ? substr($this->board['loadbalanceurl'], 0, strrpos($this->board['loadbalanceurl'], '/')) : '';
 
+			if ($this->board['loadbalanceurl'] != '' && $this->board['loadbalancepassword'] != '') {
+				require_once KU_ROOTDIR . 'inc/classes/loadbalancer.class.php';
+				$this->loadbalancer = new Load_Balancer;
+
+				$this->loadbalancer->url = $this->board['loadbalanceurl'];
+				$this->loadbalancer->password = $this->board['loadbalancepassword'];
+			}
 		}
 	}
 
