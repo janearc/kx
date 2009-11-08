@@ -167,33 +167,32 @@ class Board {
 					$this->RegenerateThreads($thread['id']);
 					$this->dwoo_data->assign('replythread', 0);
 				}
-				$replycount = Array();
-				if ($this->board['type'] == 1 || $this->board['type'] == 3 ) {
-					$replycount = $tc_db->GetAll("SELECT COUNT(`id`) FROM `" . KU_DBPREFIX . "posts` WHERE `boardid` = " . $tc_db->qstr($this->board['id'])." AND `parentid` = " . $thread['id']);
-				} else {
-					if (KU_DBTYPE != 'sqlite')
-						$replycount = $tc_db->GetAll("SELECT COUNT(`id`) AS id , SUM( IF(file_md5!='',1,0) ) AS files FROM( SELECT id,file_md5 FROM `" . KU_DBPREFIX . "posts` WHERE `boardid` = " . $this->board['id']." AND `parentid` = ".$thread['id']."  AND `IS_DELETED` = 0 ORDER BY `timestamp` DESC LIMIT 100000000 OFFSET " . (($thread['stickied'] == 1) ? (KU_REPLIESSTICKY) : (KU_REPLIES)) . "  ) AS replies");
-					else {
-						$replycount[0][] = $tc_db->GetOne("SELECT COUNT(`id`) FROM `" . KU_DBPREFIX . "posts` WHERE `boardid` = " . $this->board['id']." AND `parentid` = ".$thread['id']." AND `IS_DELETED` = 0 OFFSET " . (($thread['stickied'] == 1) ? (KU_REPLIESSTICKY) : (KU_REPLIES)));
-						$replycount[0][] = $tc_db->GetOne("SELECT COUNT(`id`) FROM `" . KU_DBPREFIX . "posts` WHERE `boardid` = " . $this->board['id']." AND `parentid` = ".$thread['id']." AND `file` != '' AND `IS_DELETED` = 0 OFFSET " . (($thread['stickied'] == 1) ? (KU_REPLIESSTICKY) : (KU_REPLIES)));
-					}
-				}
-				$thread['replies'] = $replycount[0][0];
-				$thread['images'] = (isset($replycount[0][1]) ? $replycount[0][1] : '');
 				$thread = $this->BuildPost($thread, true);
 				
 				if ($this->board['type'] != 3) {
+					$omitids = '';
 					$posts = $tc_db->GetAll("SELECT * FROM `" . KU_DBPREFIX . "posts` WHERE `boardid` = " . $this->board['id']." AND `parentid` = ".$thread['id']." " . (($this->board['type'] != 1) ? ("AND `IS_DELETED` = 0") : ("")) . " ORDER BY `id` DESC LIMIT ".(($thread['stickied'] == 1) ? (KU_REPLIESSTICKY) : (KU_REPLIES)));
 					foreach ($posts as $key=>$post) {
+						$omitids .= $post['id'].",";
 						$posts[$key] = $this->BuildPost($post, true);
 					}
+
 					$posts = array_reverse($posts);
+					$omitids = substr($omitids, 0, -1);
 					array_unshift($posts, $thread);
 					$newposts[] = $posts;
 				} else {
 					if (!$thread['tag']) $thread['tag'] = '*';
 					$newposts[] = $thread;
 				}
+				$replycount = Array();
+				if ($this->board['type'] == 1 || $this->board['type'] == 3 ) {
+					$replycount = $tc_db->GetAll("SELECT COUNT(`id`) FROM `" . KU_DBPREFIX . "posts` WHERE `boardid` = " . $tc_db->qstr($this->board['id'])." AND `parentid` = " . $thread['id']);
+				} else {
+					$replycount = $tc_db->GetAll("SELECT COUNT(`id`)) AS replies, SUM(CASE WHEN `file_md5` = '' THEN 0 ELSE 1 END) AS files FROM `" . KU_DBPREFIX . "posts` WHERE `boardid` = " . $this->board['id']."  AND `parentid` = ".$thread['id']." AND `is_deleted` = 0 AND `id` NOT IN (" . $omitids . ")");
+				}
+				$newposts[$k][0]['replies'] = $replycount[0][0];
+				$newposts[$k][0]['images'] = (isset($replycount[0][1]) ? $replycount[0][1] : '');
 			}
 			if ($this->board['type'] == 0 && !isset($embeds)) {
 				$embeds = $tc_db->GetAll("SELECT * FROM `" . KU_DBPREFIX . "embeds`");
