@@ -396,7 +396,7 @@ class Manage {
 				$results = $tc_db->GetAll("SELECT HIGH_PRIORITY * FROM `" . KU_DBPREFIX . "announcements` WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
 				$values = $results[0]; $disptable = false;
 			} elseif ($_GET['act'] == 'del') {
-				$tc_db->Execute("DELETE FROM`" . KU_DBPREFIX . "announcements` WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
+				$tc_db->Execute("DELETE FROM `" . KU_DBPREFIX . "announcements` WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
 				$tpl_page .= '<hr /><h3>'. _gettext('Announcement successfully deleted') .'</h3><hr />';
 				management_addlogentry(_gettext('Deleted an announcement'), 9);
 			} elseif ($_GET['act'] == 'add' && isset($_POST['announcement']) && isset($_POST['subject'])) {
