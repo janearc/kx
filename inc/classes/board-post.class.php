@@ -159,7 +159,7 @@ class Board {
 			$threads = $tc_db->GetAll("SELECT * FROM `" . KU_DBPREFIX . "posts` WHERE `boardid` = " . $this->board['id'] . " AND `parentid` = 0 AND `IS_DELETED` = 0 ORDER BY `stickied` DESC, `bumped` DESC LIMIT ". ($postsperpage)." OFFSET ". $postsperpage * $i);
 
 			$executiontime_start_page = microtime_float();
-			foreach ($threads as $thread) {
+			foreach ($threads as $k=>$thread) {
 				// If the thread is on the page set to mark, && hasn't been marked yet, mark it
 				if ($thread['deleted_timestamp'] == 0 && $this->board['markpage'] > 0 && $i >= $this->board['markpage']) {
 					$tc_db->Execute("UPDATE `".KU_DBPREFIX."posts` SET `deleted_timestamp` = '" . (time() + 7200) . "' WHERE `boardid` = " . $tc_db->qstr($this->board['id'])." AND `id` = '" . $thread['id'] . "'");
@@ -189,7 +189,7 @@ class Board {
 				if ($this->board['type'] == 1 || $this->board['type'] == 3 ) {
 					$replycount = $tc_db->GetAll("SELECT COUNT(`id`) FROM `" . KU_DBPREFIX . "posts` WHERE `boardid` = " . $tc_db->qstr($this->board['id'])." AND `parentid` = " . $thread['id']);
 				} else {
-					$replycount = $tc_db->GetAll("SELECT COUNT(`id`)) AS replies, SUM(CASE WHEN `file_md5` = '' THEN 0 ELSE 1 END) AS files FROM `" . KU_DBPREFIX . "posts` WHERE `boardid` = " . $this->board['id']."  AND `parentid` = ".$thread['id']." AND `is_deleted` = 0 AND `id` NOT IN (" . $omitids . ")");
+					$replycount = $tc_db->GetAll("SELECT COUNT(`id`) AS replies, SUM(CASE WHEN `file_md5` = '' THEN 0 ELSE 1 END) AS files FROM `" . KU_DBPREFIX . "posts` WHERE `boardid` = " . $this->board['id']."  AND `parentid` = ".$thread['id']." AND `is_deleted` = 0 AND `id` NOT IN (" . $omitids . ")");
 				}
 				$newposts[$k][0]['replies'] = $replycount[0][0];
 				$newposts[$k][0]['images'] = (isset($replycount[0][1]) ? $replycount[0][1] : '');
