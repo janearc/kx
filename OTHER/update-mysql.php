@@ -221,17 +221,17 @@ function front_db_conversion() {
 	$rules	= $tc_db->GetAll("SELECT * FROM `" . KU_DBPREFIX . "rules` ORDER BY `order`");
 
 	foreach ($news as $newspost) {
-		$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `subject` , `message` , `timestamp` , `poster` , `email` ) VALUES ( '0', '" . $newspost['subject'] . "' , '" . $newspost['message'] . "' , '" . $newspost['postedat'] . "' , '" . $newspost['postedby'] . "' , '" . $newspost['postedemail'] . "' )");
+		$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `subject` , `message` , `timestamp` , `poster` , `email` ) VALUES ( '0', " . $tc_db->qstr($newspost['subject']) . " , " . $tc_db->qstr($newspost['message']) . " , " . $tc_db->qstr($newspost['postedat']) . " , " . $tc_db->qstr($newspost['postedby']) . " , " . $tc_db->qstr($newspost['postedemail']) . " )");
 	}
 	echo 'Updated news table.<br />';
 
 	foreach ($faq as $faqpost) {
-		$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `order`, `subject` , `message` ) VALUES ( '1', '" . $faqpost['order'] . "' , '" . $faqpost['heading'] . "' , '" . $faqpost['message'] . "' )");
+		$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `order`, `subject` , `message` ) VALUES ( '1', " . $tc_db->qstr($faqpost['order']) . " , " . $tc_db->qstr($faqpost['heading']) . " , " . $tc_db->qstr($faqpost['message']) . " )");
 	}
 	echo 'Updated FAQ table.<br />';
 
 	foreach ($rules as $rulespost) {
-		$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `order`, `subject` , `message` ) VALUES ( '2', '" . $rulespost['order'] . "' , '" . $rulespost['heading'] . "' , '" . $rulespost['message'] . "' )");
+		$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `order`, `subject` , `message` ) VALUES ( '2', " . $tc_db->qstr($rulespost['order']) . " , " . $tc_db->qstr($rulespost['heading']) . " , " . $tc_db->qstr($rulespost['message']) . " )");
 	}
 	echo 'Updated rules table.<br />';
 
