@@ -3076,7 +3076,7 @@ class Manage {
 						}
 						$tpl_page .= '</td><td>';
 						if ($linereport['reason'] != '') {
-							$tpl_page .= stripslashes($linereport['reason']);
+							$tpl_page .= htmlspecialchars(stripslashes($linereport['reason']));
 						} else {
 							$tpl_page .= '&nbsp;';
 						}
