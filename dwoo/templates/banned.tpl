@@ -5,6 +5,7 @@
 <link rel="stylesheet" type="text/css" href="{%KU_BOARDSPATH}/css/site_futaba.css" title="Futaba">
 <link rel="shortcut icon" href="{%KU_WEBPATH}/favicon.ico">
 </head>
+<body>
 <h1>{%KU_NAME}</h1>
 <h3>{%KU_SLOGAN}</h3>
 <div style="margin: 3em;">
