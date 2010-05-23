@@ -27,10 +27,17 @@ if (!isset($_GET['board']) || !isset($_GET['id'])) {
 	die();
 }
 
+
+
 /**
  * Require the configuration file
  */
 require 'config.php';
+
+$imagesize = $tc_db->GetAll("SELECT `image_w`, `image_h` FROM `posts` WHERE `file` = " . $tc_db->qstr($_GET['id']) . "  LIMIT 1");
+
+$width = $imagesize[0]['image_w'];
+$height = $imagesize[0]['image_h'];
 
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
@@ -39,10 +46,10 @@ require 'config.php';
 <title>View Animation</title>
 </head>
 <body>
-<applet name="pch" code="pch2.PCHViewer.class" archive="<?php echo KU_CGIPATH; ?>/PCHViewer123.jar" width="400" height="426" alt="Applet requires Java 1.1 or later to run!" mayscript">
+<applet name="pch" code="pch2.PCHViewer.class" archive="<?php echo KU_CGIPATH; ?>/PCHViewer123.jar" width="<?php echo $width; ?>" height="<?php echo ($height + 26); ?>" alt="Applet requires Java 1.1 or later to run!" mayscript">
 <param name="archive" value="PCHViewer123.jar">
- <param name="image_width" value="400">
- <param name="image_height" value="400">
+ <param name="image_width" value="<?php echo $width; ?>">
+ <param name="image_height" value="<?php echo $height; ?>">
 
  <param name="pch_file" value="<?php echo KU_BOARDSPATH . '/' . $_GET['board'] . '/src/' . $_GET['id'] . '.pch'; ?>">
  <param name="run" value="true">
