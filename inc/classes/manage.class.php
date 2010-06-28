@@ -3190,7 +3190,9 @@ class Manage {
 					$ban_ips = unserialize($_POST['multiban']);
 				else 
 					$ban_ips = Array($ban_ip);
+				$i = 0;
 				foreach ($ban_ips as $ban_ip) {
+					$ban_msg = '';
 					$whitelist = $tc_db->GetAll("SELECT `ipmd5` FROM `" . KU_DBPREFIX . "banlist` WHERE `type` = 2");
 					if (in_array(md5($ban_ip), $whitelist)) {
 						exitWithErrorPage(_gettext('That IP is on the whitelist'));
@@ -3202,20 +3204,22 @@ class Manage {
 								$postids = Array($ban_post_id);
 							else
 								$postids = unserialize($_POST['quickmultibanpostid']);
-							foreach($postids as $ban_post_id) {
-								$results = $tc_db->GetAll("SELECT HIGH_PRIORITY `parentid`, `message` FROM `".KU_DBPREFIX."posts` WHERE `boardid` = " . $tc_db->qstr($ban_board_id) . " AND `id` = ".$tc_db->qstr($ban_post_id)." LIMIT 1");
-								foreach($results AS $line) {
-									$tc_db->Execute("UPDATE `".KU_DBPREFIX."posts` SET `message` = ".$tc_db->qstr($line['message'] . $ban_msg)." WHERE `boardid` = " . $tc_db->qstr($ban_board_id) . " AND `id` = ".$tc_db->qstr($ban_post_id));
-									clearPostCache($ban_post_id, $ban_board_id);
-									$board_class = new Board($ban_board);
-									if ($line['parentid']==0) {
-										$board_class->RegenerateThreads($ban_post_id);
-									} else {
-										$board_class->RegenerateThreads($line['parentid']);
-									}
-									$board_class->RegeneratePages();
-									unset($board_class);
-								}
+							$regenerated = array();
+							$results = $tc_db->GetAll("SELECT HIGH_PRIORITY `parentid`, `message` FROM `".KU_DBPREFIX."posts` WHERE `boardid` = " . $tc_db->qstr($ban_board_id) . " AND `id` = ".$tc_db->qstr($postids[$i])." LIMIT 1");
+								
+							foreach($results AS $line) {
+								$tc_db->Execute("UPDATE `".KU_DBPREFIX."posts` SET `message` = ".$tc_db->qstr($line['message'] . $ban_msg)." WHERE `boardid` = " . $tc_db->qstr($ban_board_id) . " AND `id` = ".$tc_db->qstr($postids[$i]));
+								echo $ban_msg . ' Post ' . $i;
+								clearPostCache($postids[$i], $ban_board_id);
+							}
+						}
+						if ($line['parentid']==0) {
+							if (!in_array(current($postids), $regenerated)) {
+								$regenerated[] = current($postids);
+							}
+						} else {
+							if (!in_array($line['parentid'], $regenerated)) {
+								$regenerated[] = $line['parentid'];
 							}
 						}
 						$tpl_page .= _gettext('Ban successfully placed.')."<br />";
@@ -3229,7 +3233,14 @@ class Manage {
 					$logentry .= ($ban_globalban == 1) ? _gettext('All boards') . ' ' : '/'. implode('/, /', explode('|', $ban_boards)) . '/ ';
 					management_addlogentry($logentry, 8);
 					$ban_ip = '';
+					$i++;
 				}
+				$board_class = new Board($ban_board);
+				foreach($regenerated as $thread) {
+					$board_class->RegenerateThreads($thread);
+				}
+				$board_class->RegeneratePages();
+				unset($board_class);
 
 				if(isset($_POST['deleteposts'])) {
 					$tpl_page .= '<br />';
