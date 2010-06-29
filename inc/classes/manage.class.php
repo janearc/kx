@@ -3095,6 +3095,7 @@ class Manage {
 	/* Addition, modification, deletion, and viewing of bans */
 	function bans() {
 		global $tc_db, $tpl_page, $bans_class;
+		
 		$this->ModeratorsOnly();
 		$reason = KU_BANREASON;
 		$ban_ip = ''; $ban_hash = ''; $ban_parentid = 0; $multiban = Array();
@@ -3198,28 +3199,30 @@ class Manage {
 						exitWithErrorPage(_gettext('That IP is on the whitelist'));
 					}
 					if ($bans_class->BanUser($ban_ip, $_SESSION['manageusername'], $ban_globalban, $ban_duration, $ban_boards, $ban_reason, $ban_note, $ban_appealat, $ban_type, $ban_allowread)) {
+						$regenerated = array();
 						if (((KU_BANMSG != '' || $_POST['banmsg'] != '') && isset($_POST['addbanmsg']) && (isset($_POST['quickbanpostid']) || isset($_POST['quickmultibanpostid']))) || $instantban ) {
 							$ban_msg = ((KU_BANMSG == $_POST['banmsg']) || empty($_POST['banmsg'])) ? KU_BANMSG : $_POST['banmsg'];
 							if (isset($ban_post_id))
 								$postids = Array($ban_post_id);
 							else
 								$postids = unserialize($_POST['quickmultibanpostid']);
-							$regenerated = array();
 							$results = $tc_db->GetAll("SELECT HIGH_PRIORITY `parentid`, `message` FROM `".KU_DBPREFIX."posts` WHERE `boardid` = " . $tc_db->qstr($ban_board_id) . " AND `id` = ".$tc_db->qstr($postids[$i])." LIMIT 1");
 								
 							foreach($results AS $line) {
 								$tc_db->Execute("UPDATE `".KU_DBPREFIX."posts` SET `message` = ".$tc_db->qstr($line['message'] . $ban_msg)." WHERE `boardid` = " . $tc_db->qstr($ban_board_id) . " AND `id` = ".$tc_db->qstr($postids[$i]));
 								echo $ban_msg . ' Post ' . $i;
 								clearPostCache($postids[$i], $ban_board_id);
-							}
-						}
-						if ($line['parentid']==0) {
-							if (!in_array(current($postids), $regenerated)) {
-								$regenerated[] = current($postids);
-							}
-						} else {
-							if (!in_array($line['parentid'], $regenerated)) {
-								$regenerated[] = $line['parentid'];
+								if ($line['parentid']==0) {
+									if (!in_array($postids, $regenerated)) {
+										$regenerated[] = $postids[$i];
+										echo 'Line 3368';
+									}
+								} else {
+									if (!in_array($line['parentid'], $regenerated)) {
+										$regenerated[] = $line['parentid'];
+										echo 'Line 3373';
+									}
+								}
 							}
 						}
 						$tpl_page .= _gettext('Ban successfully placed.')."<br />";
@@ -3235,12 +3238,14 @@ class Manage {
 					$ban_ip = '';
 					$i++;
 				}
-				$board_class = new Board($ban_board);
-				foreach($regenerated as $thread) {
-					$board_class->RegenerateThreads($thread);
+				if (count($regenerated) > 0) {
+					$board_class = new Board($ban_board);
+					foreach($regenerated as $thread) {
+						$board_class->RegenerateThreads($thread);
+					}
+					$board_class->RegeneratePages();
+					unset($board_class);
 				}
-				$board_class->RegeneratePages();
-				unset($board_class);
 
 				if(isset($_POST['deleteposts'])) {
 					$tpl_page .= '<br />';
