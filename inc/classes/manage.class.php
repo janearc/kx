@@ -109,6 +109,7 @@ class Manage {
 						$tc_db->Execute("UPDATE `" .KU_DBPREFIX. "staff` SET password = '" .$newpass. "' WHERE username = " .$tc_db->qstr($_POST['username']));
 						$_SESSION['manageusername'] = $_POST['username'];
 						$_SESSION['managepassword'] = $newpass;
+            $_SESSION['token'] = md5($_SESSION['manageusername'] . $_SESSION['managepassword'] . rand(0,100));
 						$this->SetModerationCookies();
 						$tc_db->Execute("DELETE FROM `" . KU_DBPREFIX . "loginattempts` WHERE `ip` < '" . $_SERVER['REMOTE_ADDR'] . "'");
 						$action = 'posting_rates';
@@ -122,6 +123,7 @@ class Manage {
 					if (md5($_POST['password'] . $results[0]['salt']) == $results[0]['password']) {
 						$_SESSION['manageusername'] = $_POST['username'];
 						$_SESSION['managepassword'] = md5($_POST['password'] . $results[0]['salt']);
+            $_SESSION['token'] = md5($_SESSION['manageusername'] . $_SESSION['managepassword'] . rand(0,100));
 						$this->SetModerationCookies();
 						$action = 'posting_rates';
 						management_addlogentry(_gettext('Logged in'), 1);
@@ -153,6 +155,14 @@ class Manage {
 			}
 		}
 	}
+  
+  function CheckToken($posttoken) {
+    if ($posttoken != $_SESSION['token']) {
+      // Something is strange
+      session_destroy();
+      exitWithErrorPage(_gettext('Invalid Token'));
+    }
+  }
 
 	/* Log current user out */
 	function Logout() {
@@ -163,6 +173,7 @@ class Manage {
 		session_destroy();
 		unset($_SESSION['manageusername']);
 		unset($_SESSION['managepassword']);
+    unset($_SESSION['token']);
 		die('<script type="text/javascript">top.location.href = \''. KU_CGIPATH .'/manage.php\';</script>');
 	}
 
@@ -195,9 +206,10 @@ class Manage {
 	function CurrentUserIsAdministrator() {
 		global $tc_db, $tpl_page;
 
-		if ($_SESSION['manageusername'] == '' || $_SESSION['managepassword'] == '') {
+		if ($_SESSION['manageusername'] == '' || $_SESSION['managepassword'] == '' || $_SESSION['token'] == '') {
 			$_SESSION['manageusername'] = '';
 			$_SESSION['managepassword'] = '';
+      $_SESSION['token'] = '';
 			return false;
 		}
 
@@ -219,9 +231,10 @@ class Manage {
 	function CurrentUserIsModerator() {
 		global $tc_db, $tpl_page;
 
-		if ($_SESSION['manageusername'] == '' || $_SESSION['managepassword'] == '') {
+		if ($_SESSION['manageusername'] == '' || $_SESSION['managepassword'] == '' || $_SESSION['token'] == '') {
 			$_SESSION['manageusername'] = '';
 			$_SESSION['managepassword'] = '';
+      $_SESSION['token'] = '';
 			return false;
 		}
 
@@ -337,6 +350,7 @@ class Manage {
 
 		$tpl_page .= '<h2>'. _gettext('Change account password') . '</h2><br />';
 		if (isset($_POST['oldpwd']) && isset($_POST['newpwd']) && isset($_POST['newpwd2'])) {
+      $this->CheckToken($_POST['token']);
 			if ($_POST['oldpwd'] != '' && $_POST['newpwd'] != '' && $_POST['newpwd2'] != '') {
 				if ($_POST['newpwd'] == $_POST['newpwd2']) {
 					$results = $tc_db->GetAll("SELECT HIGH_PRIORITY * FROM `" . KU_DBPREFIX . "staff` WHERE `username` = " . $tc_db->qstr($_SESSION['manageusername']) . "");
@@ -360,7 +374,7 @@ class Manage {
 			$tpl_page .= '<hr />';
 		}
 		$tpl_page .= '<form action="manage_page.php?action=changepwd" method="post">
-
+    <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 		<label for="oldpwd">'. _gettext('Old password') . ':</label>
 		<input type="password" name="oldpwd" /><br />
 
@@ -388,6 +402,7 @@ class Manage {
 		if(isset($_GET['act'])) {
 			if ($_GET['act'] == 'edit') {
 				if (isset($_POST['announcement'])) {
+          $this->CheckToken($_POST['token']);
 					$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "announcements` SET `subject` = " . $tc_db->qstr($_POST['subject']) . ", `message` = " . $tc_db->qstr($_POST['announcement']) . " WHERE `id` = " . $tc_db->qstr($_GET['id']));
 					$tpl_page .= '<hr /><h3>'. _gettext('Announcement edited') .'</h3><hr />';
 					management_addlogentry(_gettext('Edited an announcement'));
@@ -413,6 +428,7 @@ class Manage {
 		}
 		$tpl_page .= '<h2>'. $title . '</h2><br />
 			<form method="post" action="?action=addannouncement&amp;act='. $formval . '">
+      <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 			<label for="subject">'. _gettext('Subject') . ':</label>
 			<input type="text" id="subject" name="subject" value="'. (isset($values['subject']) ? $values['subject'] : '') . '" />
 			<div class="desc">'. _gettext('Can not be left blank') . '</div><br />
@@ -453,6 +469,7 @@ class Manage {
 		sort($files);
 
 		if(isset($_POST['templatedata']) && isset($_POST['template'])) {
+      $this->CheckToken($_POST['token']);
 			$file = basename($_POST['template']);
 			if (in_array($file, $files)) {
 				if(file_exists(KU_TEMPLATEDIR . '/'. $file)) {
@@ -483,6 +500,7 @@ class Manage {
 			if (in_array($file, $files)) {
 				if(file_exists(KU_TEMPLATEDIR . '/'. $file)) {
 								$tpl_page .= '<form method="post" action="?action=templates">
+          <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 					<input type="hidden" name="template" value="'. $file .'" />
 					<textarea wrap=off rows=40 cols=100 name="templatedata">'. htmlspecialchars(file_get_contents(KU_TEMPLATEDIR . '/'. $file)) . '</textarea>
 					<label for="rebuild">'. _gettext('Rebuild HTML after edit?') .'</label>
@@ -505,6 +523,7 @@ class Manage {
 		if(isset($_GET['act'])) {
 			if ($_GET['act'] == 'edit') {
 				if (isset($_POST['news'])) {
+          $this->CheckToken($_POST['token']);
 					$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "front` SET `subject` = " . $tc_db->qstr($_POST['subject']) . ", `message` = " . $tc_db->qstr($_POST['news']) . ", `email` = " . $tc_db->qstr($_POST['email']) . " WHERE `id` = " . $tc_db->qstr($_GET['id']) . " AND `page` = 0");
 					$tpl_page .= '<hr /><h3>'. _gettext('News post edited') .'</h3><hr />';
 					management_addlogentry(_gettext('Edited a news entry'), 9);
@@ -520,6 +539,7 @@ class Manage {
 			} elseif ($_GET['act'] == 'add') {
 				if (isset($_POST['news']) && isset($_POST['subject']) && isset($_POST['email'])) {
 					if (!empty($_POST['news']) || !empty($_POST['subject'])) {
+            $this->CheckToken($_POST['token']);
 						$tpl_page .= '<hr />';
 						$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `subject` , `message` , `timestamp` , `poster` , `email` ) VALUES ( '0', " . $tc_db->qstr($_POST['subject']) . " , " . $tc_db->qstr($_POST['news']) . " , '" . time() . "' , " . $tc_db->qstr($_SESSION['manageusername']) . " , " . $tc_db->qstr($_POST['email']) . " )");
 						$tpl_page .= '<h3>'. _gettext('News entry successfully added.') . '</h3>';
@@ -533,6 +553,7 @@ class Manage {
 		}
 		$tpl_page .= '<h2>'. $title . '</h2><br />
 			<form method="post" action="?action=news&amp;act='. $formval . '">
+      <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 			<label for="subject">'. _gettext('Subject') . ':</label>
 			<input type="text" id="subject" name="subject" value="'. (isset($values['subject']) ? $values['subject'] : '') . '" />
 			<div class="desc">'. _gettext('Can not be left blank.') . '</div><br />
@@ -566,6 +587,7 @@ class Manage {
 		if(isset($_GET['act'])) {
 			if ($_GET['act'] == 'edit') {
 				if (isset($_POST['faq'])) {
+          $this->CheckToken($_POST['token']);
 					$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "front` SET `subject` = " . $tc_db->qstr($_POST['heading']) . ", `message` = " . $tc_db->qstr($_POST['faq']) . ", `order` = " . intval($_POST['order']) . " WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
 					$tpl_page .= '<hr /><h3>'. _gettext('FAQ entry edited') .'</h3><hr />';
 					management_addlogentry(_gettext('Edited a FAQ entry'), 9);
@@ -581,6 +603,7 @@ class Manage {
 			} elseif ($_GET['act'] == 'add') {
 				if (isset($_POST['faq']) && isset($_POST['heading']) && isset($_POST['order'])) {
 					if (!empty($_POST['faq']) || !empty($_POST['heading'])) {
+            $this->CheckToken($_POST['token']);
 						$tpl_page .= '<hr />';
 						$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `subject` , `message` , `order` ) VALUES ( '1', " . $tc_db->qstr($_POST['heading']) . " , " . intval($_POST['faq']) . " , " . intval($_POST['order']) . " )");
 						$tpl_page .= '<h3>'. _gettext('FAQ entry successfully added.') . '</h3>';
@@ -594,6 +617,7 @@ class Manage {
 		}
 		$tpl_page .= '<h2>'. $title . '</h2><br />
 			<form method="post" action="?action=faq&amp;act='. $formval . '">
+      <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 			<label for="heading">'. _gettext('Heading') . ':</label>
 			<input type="text" id="heading" name="heading" value="'. (isset($values['subject']) ? $values['subject'] : '') . '" />
 			<div class="desc">'. _gettext('Can not be left blank.') . '</div><br />
@@ -627,6 +651,7 @@ class Manage {
 		if(isset($_GET['act'])) {
 			if ($_GET['act'] == 'edit') {
 				if (isset($_POST['rules'])) {
+          $this->CheckToken($_POST['token']);
 					$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "front` SET `subject` = " . $tc_db->qstr($_POST['heading']) . ", `message` = " . $tc_db->qstr($_POST['rules']) . ", `order` = " . intval($_POST['order']) . " WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
 					$tpl_page .= '<hr /><h3>'. _gettext('Rules entry edited') .'</h3><hr />';
 					management_addlogentry(_gettext('Edited a Rule entry'), 9);
@@ -642,6 +667,7 @@ class Manage {
 			} elseif ($_GET['act'] == 'add') {
 				if (isset($_POST['rules']) && isset($_POST['heading']) && isset($_POST['order'])) {
 					if (!empty($_POST['rules']) || !empty($_POST['heading'])) {
+            $this->CheckToken($_POST['token']);
 						$tpl_page .= '<hr />';
 						$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "front` ( `page`, `subject` , `message` , `order` ) VALUES ( '2', " . $tc_db->qstr($_POST['heading']) . " , " . $tc_db->qstr($_POST['rules']) . " , " . intval($_POST['order']) . " )");
 						$tpl_page .= '<h3>'. _gettext('Rules entry successfully added.') . '</h3>';
@@ -655,6 +681,7 @@ class Manage {
 		}
 		$tpl_page .= '<h2>'. $title . '</h2><br />
 			<form method="post" action="?action=rules&amp;act='. $formval . '">
+      <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 			<label for="heading">'. _gettext('Heading') . ':</label>
 			<input type="text" id="heading" name="heading" value="'. (isset($values['subject']) ? $values['subject'] : '') . '" />
 			<div class="desc">'. _gettext('Can not be left blank.') . '</div><br />
@@ -690,6 +717,7 @@ class Manage {
 			switch($_GET['act']) {
 				case 'add':
 					if (isset($_POST['message'])) {
+            $this->CheckToken($_POST['token']);
 						$important = (isset($_POST['important'])) ? 1 : 0;
 						$tc_db->Execute("INSERT INTO `" . KU_DBPREFIX . "blotter` (`at`, `message`, `important`) VALUES ('" . time() . "', " . $tc_db->qstr($_POST['message']) . ", '" . $important . "')");
 						$tpl_page .= '<h3>'. _gettext('Blotter entry added.') . '</h3>';
@@ -709,6 +737,7 @@ class Manage {
 					if (is_numeric($_GET['id'])) {
 						$act = 'edit&amp;id=' .$_GET['id'];
 						if (isset($_POST['message'])) {
+              $this->CheckToken($_POST['token']);
 							$important = (isset($_POST['important'])) ? 1 : 0;
 							$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "blotter` SET `message` = " . $tc_db->qstr($_POST['message']) . ", `important` = '" . $important . "' WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
 							$tpl_page .= '<h3>'. _gettext('Blotter entry updated.') . '</h3>';
@@ -727,6 +756,7 @@ class Manage {
 		}
 
 		$tpl_page .= '<form action="?action=blotter&amp;act=' .$act. '" method="post">
+          <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 					<label for="message">' ._gettext('Message'). ':</label>
 					<input type="text" id="message" name="message" value="' .(isset($values['message']) ? $values['message'] : ''). '" size="75" /><br />
 					<label for="important">' ._gettext('Important'). ':</label>
@@ -808,6 +838,7 @@ class Manage {
 			$results = $tc_db->GetAll("SELECT HIGH_PRIORITY * FROM `" .KU_DBPREFIX. "staff` WHERE `username` = " .$tc_db->qstr($_POST['username']));
 			if (count($results) == 0) {
 				if ($_POST['type'] < 3 && $_POST['type'] >= 0) {
+          $this->CheckToken($_POST['token']);
 					$salt = $this->CreateSalt();
 					$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" .KU_DBPREFIX. "staff` ( `username` , `password` , `salt` , `type` , `addedon` ) VALUES (" .$tc_db->qstr($_POST['username']). " , '" .md5($_POST['password'] . $salt). "' , '" .$salt. "' , '" .$_POST['type']. "' , '" .time(). "' )");
 					$log = _gettext('Added'). ' ';
@@ -845,6 +876,7 @@ class Manage {
 			$results = $tc_db->GetAll("SELECT HIGH_PRIORITY * FROM `" . KU_DBPREFIX . "staff` WHERE `id` = " . $tc_db->qstr($_GET['edit']) . "");
 			if (count($results) > 0) {
 				if (isset($_POST['submitting'])) {
+          $this->CheckToken($_POST['token']);
 					$username = $results[0]['username'];
 					$type	= $results[0]['type'];
 					$boards	= array();
@@ -897,6 +929,7 @@ class Manage {
 				$boards	= explode('|', $results[0]['boards']);
 
 				$tpl_page .= '<form action="manage_page.php?action=staff&edit=' .$_GET['edit']. '" method="post">
+              <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 							<label for="username">' ._gettext('Username'). ':</label>
 							<input type="text" id="username" name="username" value="' .$username. '" disabled="disabled" /><br />
 							<label for="type">' ._gettext('Type'). ':</label>
@@ -924,6 +957,7 @@ class Manage {
 		}
 
 		$tpl_page .= '<form action="manage_page.php?action=staff&add" method="post">
+          <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 					<label for="username">' ._gettext('Username'). ':</label>
 					<input type="text" id="username" name="username" /><br />
 					<label for="password">' ._gettext('Password'). ':</label>
@@ -1034,6 +1068,7 @@ class Manage {
 
 		$tpl_page .= '<h2>'. _gettext('SQL query') . '</h2><br />';
 		if (isset($_POST['query'])) {
+      $this->CheckToken($_POST['token']);
 			$tpl_page .= '<hr />';
 			$result = $tc_db->Execute($_POST['query']);
 			if ($result) {
@@ -1045,7 +1080,7 @@ class Manage {
 			management_addlogentry(_gettext('Inserted SQL'), 0);
 		}
 		$tpl_page .= '<form method="post" action="?action=sql">
-
+    <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 		<textarea name="query" rows="20" cols="60"></textarea>
 		<br /><br />
 		<input type="submit" value="'. _gettext('Inject') . '" />
@@ -1103,6 +1138,7 @@ class Manage {
 		$this->AdministratorsOnly();
 
 		if (isset($_POST['directory'])) {
+      $this->CheckToken($_POST['token']);
 			if (isset($_POST['add'])) {
 				$tpl_page .= $this->addBoard($_POST['directory'], $_POST['desc']);
 			} elseif (isset($_POST['del'])) {
@@ -1115,7 +1151,7 @@ class Manage {
 		}
 		$tpl_page .= '<h2>'. _gettext('Add board') . '</h2><br />
 		<form action="manage_page.php?action=adddelboard" method="post">
-
+    <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 		<input type="hidden" name="add" id="add" value="add" />
 		<label for="directory">'. _gettext('Directory') . ':</label>
 		<input type="text" name="directory" id="directory" />
@@ -1136,7 +1172,7 @@ class Manage {
 		<h2>'. _gettext('Delete board') .'</h2><br />
 
 		<form action="manage_page.php?action=adddelboard" method="post">
-
+    <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 		<input type="hidden" name="del" id="del" value="del" />
 		<label for="directory">'. _gettext('Directory') .':</label>' .
 		$this->MakeBoardListDropdown('directory', $this->BoardList($_SESSION['manageusername'])) .
@@ -1246,6 +1282,7 @@ class Manage {
 
 		$tpl_page .= '<h2>'. _gettext('Wordfilter') . '</h2><br />';
 		if (isset($_POST['word'])) {
+      $this->CheckToken($_POST['token']);
 			if ($_POST['word'] != '' && $_POST['replacedby'] != '') {
 				$results = $tc_db->GetAll("SELECT HIGH_PRIORITY * FROM `" . KU_DBPREFIX . "wordfilter` WHERE `word` = " . $tc_db->qstr($_POST['word']) . "");
 				if (count($results) == 0) {
@@ -1298,7 +1335,7 @@ class Manage {
 					if (!isset($_POST['replacedby'])) {
 						foreach ($results as $line) {
 							$tpl_page .= '<form action="manage_page.php?action=wordfilter&editword='.$_GET['editword'].'" method="post">
-
+              <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 							<label for="word">'. _gettext('Word') .':</label>
 							<input type="text" name="word" value="'.$line['word'].'" disabled /><br />
 
@@ -1333,6 +1370,7 @@ class Manage {
 							</form>';
 						}
 					} else {
+            $this->CheckToken($_POST['token']);
 						$results = $tc_db->GetAll("SELECT HIGH_PRIORITY * FROM `" . KU_DBPREFIX . "wordfilter` WHERE `id` = " . $tc_db->qstr($_GET['editword']) . "");
 						if (count($results) > 0) {
 							foreach ($results as $line) {
@@ -1367,7 +1405,7 @@ class Manage {
 			}
 		} else {
 			$tpl_page .= '<form action="manage_page.php?action=wordfilter" method="post">
-
+      <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 			<label for="word">'. _gettext('Word') .':</label>
 			<input type="text" name="word" /><br />
 
@@ -1418,6 +1456,7 @@ class Manage {
 
 		if (isset($_GET['edit']) && ($_GET['edit'] == 1 || $_GET['edit'] == 2)) {
 			if (isset($_POST['code']) and !empty($_POST['code'])) {
+        $this->CheckToken($_POST['token']);
 				$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "ads` SET `disp` = " . $tc_db->qstr($_POST['disp']) . ", `code` = " . $tc_db->qstr($_POST['code']) . " WHERE `id` = " . $tc_db->qstr($_GET['edit']) . "");
 				$tpl_page .= '<hr /><h3>'. _gettext('Ad Edited.') .'</h3><p style="text-align: center;">'.sprintf(_gettext('Click %shere%s to return to Ad Management.'),'<a href="?action=ads">','</a>') .'</p><hr />'. "\n";
 				management_addlogentry(_gettext('Edited an ad'));
@@ -1425,6 +1464,7 @@ class Manage {
 			$results = $tc_db->GetAll("SELECT * FROM `" . KU_DBPREFIX . "ads` WHERE `id` = '" . $_GET['edit'] . "'");
 			foreach ($results as $ad) {
 				$tpl_page .= '<form action="?action=ads&edit='. $_GET['edit'] . '" method="post">'. "\n" .
+              '<input type="hidden" name="token" value="' . $_SESSION['token'] . '" />' . "\n" .
 							'<label for="pos">'. _gettext('Position') .':</label>'. "\n" .
 							'<input type="text" disabled="disabled" name="pos" value="'. $ad['position'] . '" /><br />'. "\n" .
 							'<label for="code">'. _gettext('Code') .':</label>'. "\n" .
@@ -1463,6 +1503,7 @@ class Manage {
 		if(isset($_GET['act'])) {
 			if ($_GET['act'] == 'edit') {
 				if (isset($_POST['embeds'])) {
+          $this->CheckToken($_POST['token']);
 					$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "embeds` SET `filetype` = " . $tc_db->qstr(trim($_POST['filetype'])) . ", `videourl` = " . $tc_db->qstr(trim($_POST['videourl'])) . ", `name` = " . $tc_db->qstr(trim($_POST['name'])) . ", `width` = " . $tc_db->qstr(trim($_POST['width'])) . ", `height` = " . $tc_db->qstr(trim($_POST['height'])) . ", `code` = " . $tc_db->qstr(trim($_POST['embeds'])) . " WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
 					$tpl_page .= '<hr /><h3>'. _gettext('Embed Edited') .'</h3><hr />';
 					management_addlogentry(_gettext('Edited an embed'), 9);
@@ -1478,6 +1519,7 @@ class Manage {
 			} elseif ($_GET['act'] == 'add') {
 				if (isset($_POST['embeds']) && isset($_POST['name']) && isset($_POST['filetype']) && isset($_POST['videourl'])) {
 					if ($_POST['embeds'] != '') {
+            $this->CheckToken($_POST['token']);
 						$width = ($_POST['width'] != '') ? $_POST['width'] : KU_YOUTUBEWIDTH;
 						$height = ($_POST['height'] != '') ? $_POST['height'] : KU_YOUTUBEHEIGHT;
 
@@ -1496,6 +1538,7 @@ class Manage {
 		}
 		$tpl_page .= '<h2>'. $title . '</h2><br />
 			<form method="post" action="?action=embeds&amp;act='. $formval . '">
+      <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 			<label for="name">'. _gettext('Site Name') . ':</label>
 			<input type="text" id="name" name="name" value="'. (isset($values['name']) ? $values['name'] : ''). '" />
 			<div class="desc">'. _gettext('Can not be left blank.') . '</div><br />
@@ -1547,6 +1590,7 @@ class Manage {
 		$tpl_page .= '<h2>'. _gettext('Move thread') . '</h2><br />';
 
 		if (isset($_POST['id']) && isset($_POST['board_from']) && isset($_POST['board_to'])) {
+      $this->CheckToken($_POST['token']);
 			// Get the IDs for the from and to boards
 			$board_from_id = $tc_db->GetOne("SELECT HIGH_PRIORITY `id` FROM `" . KU_DBPREFIX . "boards` WHERE `name` = " . $tc_db->qstr($_POST['board_from']) . "");
 			$board_to_id = $tc_db->GetOne("SELECT HIGH_PRIORITY `id` FROM `" . KU_DBPREFIX . "boards` WHERE `name` = " . $tc_db->qstr($_POST['board_to']) . "");
@@ -1623,6 +1667,7 @@ class Manage {
 		}
 
 		$tpl_page .= '<form action="?action=movethread" method="post">
+    <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 
 		<label for="id">'. _gettext('ID') . ':</label>
 		<input type="text" name="id" />
@@ -2042,12 +2087,14 @@ class Manage {
 		if (isset($_GET['do'])) {
 			if ($_GET['do'] == 'addfiletype') {
 				if (isset($_POST['filetype']) || isset($_POST['image'])) {
+          $this->CheckToken($_POST['token']);
 					if ($_POST['filetype'] != '' && $_POST['image'] != '') {
 						$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "filetypes` ( `filetype` , `mime` , `image` , `image_w` , `image_h` ) VALUES ( " . $tc_db->qstr($_POST['filetype']) . " , " . $tc_db->qstr($_POST['mime']) . " , " . $tc_db->qstr($_POST['image']) . " , " . $tc_db->qstr($_POST['image_w']) . " , " . $tc_db->qstr($_POST['image_h']) . " )");
 						$tpl_page .= _gettext('Filetype added.');
 					}
 				} else {
 					$tpl_page .= '<form action="?action=editfiletypes&do=addfiletype" method="post">
+          <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 					<label for="filetype">'. _gettext('Filetype') .':</label>
 					<input type="text" name="filetype" />
 					<div class="desc">'. _gettext('The extension this will be applied to. <strong>Must be lowercase</strong>') .'</div><br />
@@ -2077,6 +2124,7 @@ class Manage {
 			if ($_GET['do'] == 'editfiletype' && $_GET['filetypeid'] > 0) {
 				if (isset($_POST['filetype'])) {
 					if ($_POST['filetype'] != '' && $_POST['image'] != '') {
+            $this->CheckToken($_POST['token']);
 						$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "filetypes` SET `filetype` = " . $tc_db->qstr($_POST['filetype']) . " , `mime` = " . $tc_db->qstr($_POST['mime']) . " , `image` = " . $tc_db->qstr($_POST['image']) . " , `image_w` = " . $tc_db->qstr($_POST['image_w']) . " , `image_h` = " . $tc_db->qstr($_POST['image_h']) . " WHERE `id` = " . $tc_db->qstr($_GET['filetypeid']) . "");
 						if (KU_APC) {
 							apc_delete('filetype|'. $_POST['filetype']);
@@ -2088,7 +2136,7 @@ class Manage {
 					if (count($results) > 0) {
 						foreach ($results as $line) {
 							$tpl_page .= '<form action="?action=editfiletypes&do=editfiletype&filetypeid='. $_GET['filetypeid'] . '" method="post">
-
+              <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 							<label for="filetype">'. _gettext('Filetype') .':</label>
 							<input type="text" name="filetype" value="'. $line['filetype'] . '" />
 							<div class="desc">'. _gettext('The extension this will be applied to. <strong>Must be lowercase</strong>') .'</div><br />
@@ -2148,6 +2196,7 @@ class Manage {
 			if ($_GET['do'] == 'addsection') {
 				if (isset($_POST['name'])) {
 					if ($_POST['name'] != '' && $_POST['abbreviation'] != '') {
+            $this->CheckToken($_POST['token']);
 						$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "sections` ( `name` , `abbreviation` , `order` , `hidden` ) VALUES ( " . $tc_db->qstr($_POST['name']) . " , " . $tc_db->qstr($_POST['abbreviation']) . " , " . $tc_db->qstr($_POST['order']) . " , '" . (isset($_POST['hidden']) ? '1' : '0') . "' )");
 						require_once KU_ROOTDIR . 'inc/classes/menu.class.php';
 						$menu_class = new Menu();
@@ -2156,6 +2205,7 @@ class Manage {
 					}
 				} else {
 					$tpl_page .= '<form action="?action=editsections&do=addsection" method="post">
+          <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 					<label for="name">'. _gettext('Name') .':</label><input type="text" name="name" /><div class="desc">'. _gettext('The name of the section') .'</div><br />
 					<label for="abbreviation">'. _gettext('Abbreviation') .':</label><input type="text" name="abbreviation" /><div class="desc">'. _gettext('Abbreviation (less then 10 characters)') .'</div><br />
 					<label for="order">'. _gettext('Order') .':</label><input type="text" name="order" /><div class="desc">'. _gettext('Order to show this section with others, in ascending order') .'</div><br />
@@ -2168,6 +2218,7 @@ class Manage {
 			if ($_GET['do'] == 'editsection' && $_GET['sectionid'] > 0) {
 				if (isset($_POST['name'])) {
 					if ($_POST['name'] != '' && $_POST['abbreviation'] != '') {
+            $this->CheckToken($_POST['token']);
 						$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "sections` SET `name` = " . $tc_db->qstr($_POST['name']) . " , `abbreviation` = " . $tc_db->qstr($_POST['abbreviation']) . " , `order` = " . $tc_db->qstr($_POST['order']) . " , `hidden` = '" . (isset($_POST['hidden']) ? '1' : '0') . "' WHERE `id` = '" . $_GET['sectionid'] . "'");
 						require_once KU_ROOTDIR . 'inc/classes/menu.class.php';
 						$menu_class = new Menu();
@@ -2179,6 +2230,7 @@ class Manage {
 					if (count($results) > 0) {
 						foreach ($results as $line) {
 							$tpl_page .= '<form action="?action=editsections&do=editsection&sectionid='. $_GET['sectionid'] . '" method="post">
+              <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 							<input type="hidden" name="id" value="'. $_GET['sectionid'] . '" />
 
 							<label for="name">'. _gettext('Name') .':</label>
@@ -2266,6 +2318,7 @@ class Manage {
 
 		$tpl_page .= '<h2>'. _gettext('Board options') . '</h2><br />';
 		if (isset($_GET['updateboard']) && isset($_POST['order']) && isset($_POST['maxpages']) && isset($_POST['maxage']) && isset($_POST['messagelength'])) {
+      $this->CheckToken($_POST['token']);
 			if (!$this->CurrentUserIsModeratorOfBoard($_GET['updateboard'], $_SESSION['manageusername'])) {
 				exitWithErrorPage(_gettext('You are not a moderator of this board.'));
 			}
@@ -2340,8 +2393,8 @@ class Manage {
 			if (count($resultsboard) > 0) {
 				foreach ($resultsboard as $lineboard) {
 					$tpl_page .= '<div class="container">
-					<form action="?action=boardopts&updateboard='.urlencode($_POST['board']).'" method="post">';
-
+					<form action="?action=boardopts&updateboard='.urlencode($_POST['board']).'" method="post">
+          <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />';
 					/* Directory */
 					$tpl_page .= '<label for="board">'. _gettext('Directory') .':</label>
 					<input type="text" name="board" value="'.$_POST['board'].'" disabled />
@@ -2855,6 +2908,7 @@ class Manage {
 
 		$isquickdel = false;
 		if (isset($_POST['boarddir']) || isset($_GET['boarddir'])) {
+      $this->CheckToken($_POST['token']);
 			if (isset($_GET['boarddir'])) {
 				$isquickdel = true;
 				$_POST['boarddir'] = $_GET['boarddir'];
@@ -2975,6 +3029,7 @@ class Manage {
 		$tpl_page .= '<h2>'. _gettext('Delete thread/post') . '</h2><br />';
 		if (!$multidel) {
 			$tpl_page .= '<form action="manage_page.php?action=delposts" method="post">
+      <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 			<label for="boarddir">'. _gettext('Board') .':</label>' .
 			$this->MakeBoardListDropdown('boarddir', $this->BoardList($_SESSION['manageusername'])) .
 			'<br />
@@ -3587,6 +3642,7 @@ class Manage {
 		}
 		if (isset($_POST['ip']) || isset($_POST['multiban'])) {
 			if ($_POST['ip'] != '' || !empty($_POST['multiban'])) {
+        $this->CheckToken($_POST['token']);
 				$deletion_boards = array();
 				$deletion_new_boards = array();
 				$board_ids = '';
@@ -3650,7 +3706,7 @@ class Manage {
 		}
 		if (!$from_ban) {
 			$tpl_page .= '<form action="?action=deletepostsbyip" method="post">
-
+      <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 			<fieldset><legend>IP</legend>
 			<label for="ip">'. _gettext('IP') .':</label>
 			<input type="text" id="ip" name="ip"';
@@ -4003,6 +4059,7 @@ class Manage {
 		global $tpl_page;
 		$spam = KU_ROOTDIR . 'spam.txt';
 		if (!empty($_POST['spam'])) {
+      $this->CheckToken($_POST['token']);
 			file_put_contents($spam, $_POST['spam']);
 			$tpl_page .= '<hr />'. _gettext('Spam.txt successfully edited.') .'<hr />';
 		}
@@ -4010,6 +4067,7 @@ class Manage {
 
 		$tpl_page .= '<h2>'. _gettext('Spam.txt Management') .'</h2> <br />'. "\n" .
 					'<form action="?action=spam" method="post">'. "\n" .
+          '<input type="hidden" name="token" value="' . $_SESSION['token'] . '" />' . "\n" . 
 					'<textarea name="spam" rows="25" cols="80">' . htmlspecialchars($content) . '</textarea><br />' . "\n" .
 					'<input type="submit" value="'. _gettext('Submit') .'" />'. "\n" .
 					'</form>'. "\n";

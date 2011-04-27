@@ -33,8 +33,14 @@ if (!isset($_GET['board']) || !isset($_GET['id'])) {
  * Require the configuration file
  */
 require 'config.php';
+$imagesize = $tc_db->GetAll("SELECT `image_w`, `image_h` FROM `" . KU_DBPREFIX . "posts` WHERE `file` = " . $tc_db->qstr($_GET['id']) . "  LIMIT 1");
 
-$imagesize = $tc_db->GetAll("SELECT `image_w`, `image_h` FROM `posts` WHERE `file` = " . $tc_db->qstr($_GET['id']) . "  LIMIT 1");
+
+// Checks to ensure valid $_GET input
+$board = $tc_db->GetAll("SELECT `desc` FROM `" . KU_DBPREFIX . "boards WHERE `desc` = " . $tc_db->qstr($_GET['board']) . " LIMIT 1");
+if (count($board) < 1 || !is_numeric($_GET['id'])) {
+  die();
+}
 
 $width = $imagesize[0]['image_w'];
 $height = $imagesize[0]['image_h'];
