@@ -1258,6 +1258,7 @@ class Manage {
 					$output .= sprintf(_gettext('Are you absolutely sure you want to delete %s?'),'/'. $board_dir . '/') .
 					'<br />
 					<form action="manage_page.php?action=adddelboard" method="post">
+          <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 					<input type="hidden" name="del" id="del" value="del" />
 					<input type="hidden" name="directory" id="directory" value="'. $dir . '" />
 					<input type="hidden" name="confirmation" id="confirmation" value="yes" />
@@ -2906,10 +2907,12 @@ class Manage {
 	function delposts($multidel=false) {
 		global $tc_db, $tpl_page, $board_class;
 
-		$isquickdel = false;
-		if (isset($_POST['boarddir']) || isset($_GET['boarddir'])) {
-      $this->CheckToken($_POST['token']);
-			if (isset($_GET['boarddir'])) {
+    $isquickdel = false;
+    if (isset($_POST['boarddir']) || isset($_GET['boarddir'])) {
+      if (!isset($_GET['boarddir']) && isset($_POST['boarddir'])) {
+        $this->CheckToken($_POST['token']);
+      }
+      if (isset($_GET['boarddir'])) {
 				$isquickdel = true;
 				$_POST['boarddir'] = $_GET['boarddir'];
 				if (isset($_GET['delthreadid'])) {
@@ -3642,7 +3645,9 @@ class Manage {
 		}
 		if (isset($_POST['ip']) || isset($_POST['multiban'])) {
 			if ($_POST['ip'] != '' || !empty($_POST['multiban'])) {
-        $this->CheckToken($_POST['token']);
+        if (!$from_ban) {
+          $this->CheckToken($_POST['token']);
+        }
 				$deletion_boards = array();
 				$deletion_new_boards = array();
 				$board_ids = '';
