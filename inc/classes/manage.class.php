@@ -3049,6 +3049,7 @@ class Manage {
 			<br /><hr />
 
 			<form action="manage_page.php?action=delposts" method="post">
+      <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 			<label for="boarddir">'. _gettext('Board') .':</label>' .
 			$this->MakeBoardListDropdown('boarddir', $this->BoardList($_SESSION['manageusername'])) .
 			'<br />
