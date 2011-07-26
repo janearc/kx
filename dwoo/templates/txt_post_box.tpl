@@ -43,13 +43,10 @@
 			{/if}
 
 			{if $board.enablecaptcha eq 1}
-				<td class="label"><label for="captcha">{t}Captcha{/t}:</label></td>
-				<td>
-					<a href="#" onclick="javascript:document.getElementById('captchaimage').src = '{%KU_CGIPATH}/captcha.php?' + Math.random();return false;">
-					<img id="captchaimage" src="{%KU_CGIPATH}/captcha.php" border="0" width="90" height="30" alt="Captcha image" />
-					</a>&nbsp;
-					<input type="text" id="captcha" name="captcha" size="8" maxlength="6" />
-				</td>
+				<tr>
+					<td class="postblock">{t}Captcha{/t}</td>
+					<td colspan="2">{$recaptcha}</td>
+				</tr>
 			{/if}
 			{if ($board.forcedanon eq 1 && $board.enablecaptcha neq 1) || $board.forcedanon neq 1}
 				<td class="label">
