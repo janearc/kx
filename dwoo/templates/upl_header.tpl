@@ -30,6 +30,11 @@
 <script type="text/javascript"><!--
 	var hiddenthreads = getCookie('hiddenthreads').split('!');
 //--></script>
+{if $board.enablecaptcha eq 1}
+	{literal}
+		<script type="text/javascript"> var RecaptchaOptions = { theme : 'clean' }; </script>
+	{/literal}
+{/if}
 </head>
 <body>
 <div class="adminbar">

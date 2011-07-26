@@ -2083,7 +2083,9 @@ class Manage {
 	function editfiletypes() {
 		global $tc_db, $tpl_page;
 		$this->AdministratorsOnly();
-
+		if ($_POST['filetype'] == "htaccess") {
+			exitWithErrorPage(_gettext('Invalid filetype.'));
+		}
 		$tpl_page .= '<h2>'. _gettext('Edit filetypes') . '</h2><br />';
 		if (isset($_GET['do'])) {
 			if ($_GET['do'] == 'addfiletype') {
@@ -3049,7 +3051,7 @@ class Manage {
 			<br /><hr />
 
 			<form action="manage_page.php?action=delposts" method="post">
-      <input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
+			<input type="hidden" name="token" value="' . $_SESSION['token'] . '" />
 			<label for="boarddir">'. _gettext('Board') .':</label>' .
 			$this->MakeBoardListDropdown('boarddir', $this->BoardList($_SESSION['manageusername'])) .
 			'<br />

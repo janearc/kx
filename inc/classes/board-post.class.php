@@ -686,6 +686,11 @@ class Board {
 			$oekposts = $tc_db->GetAll("SELECT `id` FROM `" . KU_DBPREFIX."posts` WHERE `boardid` = " . $this->board['id']." AND (`id` = ".$replythread." OR `parentid` = ".$replythread.") AND `file` != '' AND `file` != 'removed' AND `file_type` IN ('jpg', 'gif', 'png') AND `IS_DELETED` = 0 ORDER BY `parentid` ASC, `timestamp` ASC");
 			$this->dwoo_data->assign('oekposts', $oekposts);
 		}
+		if ($this->board['enablecaptcha'] ==  1) {
+			require_once(KU_ROOTDIR.'recaptchalib.php');
+			$publickey = "6LdVg8YSAAAAAOhqx0eFT1Pi49fOavnYgy7e-lTO";
+			$this->dwoo_data->assign('recaptcha', recaptcha_get_html($publickey));
+		}
 		if(($this->board['type'] == 1 && $replythread == 0) || $this->board['type'] != 1) {
 			$postbox .= $this->dwoo->get(KU_TEMPLATEDIR . '/' . $this->board['text_readable'] . '_post_box.tpl', $this->dwoo_data);
 		}
