@@ -194,7 +194,6 @@ class Board {
 				// Workaround for upload boards
 				if ($this->board['type'] == 3) {
 					$newposts[$k]['replies'] = $replycount[0][0];
-					$newposts[$k]['images'] = (isset($replycount[0][1]) ? $replycount[0][1] : '');
 				} else {
 					$newposts[$k][0]['replies'] = $replycount[0][0];
 					$newposts[$k][0]['images'] = (isset($replycount[0][1]) ? $replycount[0][1] : '');
