@@ -29,7 +29,6 @@
 			<input type="text" name="em" size="28" maxlength="75" accesskey="e" />
 		</td>
 	</tr>
-	{/if}
 	<tr>
 		<td class="postblock">
 			{t}Subject{/t}</td>

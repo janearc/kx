@@ -191,8 +191,14 @@ class Board {
 				} else {
 					$replycount = $tc_db->GetAll("SELECT COUNT(`id`) AS replies, SUM(CASE WHEN `file_md5` = '' THEN 0 ELSE 1 END) AS files FROM `" . KU_DBPREFIX . "posts` WHERE `boardid` = " . $this->board['id']."  AND `parentid` = ".$thread['id']." AND `is_deleted` = 0 AND `id` NOT IN (" . $omitids . ")");
 				}
-				$newposts[$k][0]['replies'] = $replycount[0][0];
-				$newposts[$k][0]['images'] = (isset($replycount[0][1]) ? $replycount[0][1] : '');
+				// Workaround for upload boards
+				if ($this->board['type'] == 3) {
+					$newposts[$k]['replies'] = $replycount[0][0];
+					$newposts[$k]['images'] = (isset($replycount[0][1]) ? $replycount[0][1] : '');
+				} else {
+					$newposts[$k][0]['replies'] = $replycount[0][0];
+					$newposts[$k][0]['images'] = (isset($replycount[0][1]) ? $replycount[0][1] : '');
+				}
 			}
 			if ($this->board['type'] == 0 && !isset($embeds)) {
 				$embeds = $tc_db->GetAll("SELECT * FROM `" . KU_DBPREFIX . "embeds`");
@@ -208,6 +214,7 @@ class Board {
 			}
 			$this->dwoo_data->assign('posts', $newposts);
 			$this->dwoo_data->assign('file_path', getCLBoardPath($this->board['name'], $this->board['loadbalanceurl_formatted'], ''));
+
 			$content = $this->dwoo->get(KU_TEMPLATEDIR . '/' . $this->board['text_readable'] . '_board_page.tpl', $this->dwoo_data);
 			$footer = $this->Footer(false, (microtime_float() - $executiontime_start_page), (($this->board['type'] == 1) ? (true) : (false)));
 			$content = $header.$postbox.$content.$footer;

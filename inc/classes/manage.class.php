@@ -2083,9 +2083,7 @@ class Manage {
 	function editfiletypes() {
 		global $tc_db, $tpl_page;
 		$this->AdministratorsOnly();
-		if ($_POST['filetype'] == "htaccess") {
-			exitWithErrorPage(_gettext('Invalid filetype.'));
-		}
+		
 		$tpl_page .= '<h2>'. _gettext('Edit filetypes') . '</h2><br />';
 		if (isset($_GET['do'])) {
 			if ($_GET['do'] == 'addfiletype') {
@@ -2181,7 +2179,7 @@ class Manage {
 		if (count($results) > 0) {
 			$tpl_page .= '<table border="1" width="100%"><tr><th>'. _gettext('ID') .'</th><th>'. _gettext('Filetype') .'</th><th>'. _gettext('Image') .'</th><th>'. _gettext('Edit/Delete') .'</th></tr>';
 			foreach ($results as $line) {
-				$tpl_page .= '<tr><td>'. $line['id'] . '</td><td>'. $line['filetype'] . '</td><td>'. $line['image'] . '</td><td>[<a href="?action=editfiletypes&do=editfiletype&filetypeid='. $line['id'] . '">'. _gettext('Edit') .'</a>] [<a href="?action=editfiletypes&do=deletefiletype&filetypeid='. $line['id'] . '">'. _gettext('Delete') .'</a></td></tr>';
+				$tpl_page .= '<tr><td>'. $line['id'] . '</td><td>'. $line['filetype'] . '</td><td>'. $line['image'] . '</td><td>[<a href="?action=editfiletypes&do=editfiletype&filetypeid='. $line['id'] . '">'. _gettext('Edit') .'</a>] [<a href="?action=editfiletypes&do=deletefiletype&filetypeid='. $line['id'] . '">'. _gettext('Delete') .'</a>]</td></tr>';
 			}
 			$tpl_page .= '</table>';
 		} else {
@@ -3228,7 +3226,7 @@ class Manage {
 					$ban_boards = implode('|', $_POST['bannedfrom']);
 				}
 				$ban_globalban = (isset($_POST['banfromall']) || $instantban) ? 1 : 0;
-				$ban_allowread = ($_POST['allowread'] = 0 || $instantban) ? 0 : 1;
+				$ban_allowread = ($_POST['allowread'] == 0 || $instantban) ? 0 : 1;
 				if (isset($_POST['quickbanboardid'])) {
 					$ban_board_id = $_POST['quickbanboardid'];
 				}

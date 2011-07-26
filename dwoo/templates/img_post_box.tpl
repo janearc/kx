@@ -27,12 +27,12 @@
 			{t}Email{/t}</td>
 		<td>
 			<input type="text" name="em" size="28" maxlength="75" accesskey="e" />
-			</td>
-		</tr>
-	{/if}
+		</td>
+	</tr>
 	<tr>
 		<td class="postblock">
-			{t}Subject{/t}</td>
+			{t}Subject{/t}
+		</td>
 		<td>
 			{strip}<input type="text" name="subject" size="35" maxlength="75" accesskey="s" />&nbsp;<input type="submit" value="
 			{if %KU_QUICKREPLY && $replythread eq 0}
