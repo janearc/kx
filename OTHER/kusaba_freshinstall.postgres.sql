@@ -363,12 +363,12 @@ CREATE TABLE PREFIX_wordfilter (
 CREATE OR REPLACE FUNCTION "if"(boolean, integer, integer) RETURNS integer AS
       'SELECT CASE WHEN $1 THEN $2 ELSE $3 END:semicolon:'
       LANGUAGE 'sql';
-INSERT INTO 'PREFIX_ads' ('id', 'position', 'disp', 'boards', 'code') VALUES (1, 'top', 0, '', 'Right Frame Top');
-INSERT INTO 'PREFIX_ads' ('id', 'position', 'disp', 'boards', 'code') VALUES (2, 'bot', 0, '', 'Right Frame Bottom');
-INSERT INTO 'PREFIX_filetypes' ('filetype', 'force_thumb') VALUES ('jpg', 0);
-INSERT INTO 'PREFIX_filetypes' ('filetype', 'force_thumb') VALUES ('gif', 0);
-INSERT INTO 'PREFIX_filetypes' ('filetype', 'force_thumb') VALUES ('png', 0) ;
-INSERT INTO 'PREFIX_events' ('name', 'at') VALUES ('pingback', 0);
-INSERT INTO 'PREFIX_events' ('name', 'at') VALUES ('sitemap', 0);
-INSERT INTO 'PREFIX_embeds' ('filetype', 'name', 'videourl', 'width', 'height', 'code') VALUES ('you', 'Youtube', 'http://www.youtube.com/watch?v=', 200, 164, '<object type="application/x-shockwave-flash" width="SET_WIDTH" height="SET_HEIGHT" data="http://www.youtube.com/v/EMBED_ID"> <param name="movie" value="http://www.youtube.com/v/EMBED_ID" /> </object>');
-INSERT INTO 'PREFIX_embeds' ('filetype', 'name', 'videourl', 'width', 'height', 'code') VALUES ('goo', 'Google', 'http://video.google.com/videoplay?docid=', 200, 164, '<embed width="SET_WIDTH" height="SET_HEIGHT" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=EMBED_ID"></embed>');
+INSERT INTO PREFIX_ads ('id', 'position', 'disp', 'boards', 'code') VALUES (1, 'top', 0, '', 'Right Frame Top');
+INSERT INTO PREFIX_ads ('id', 'position', 'disp', 'boards', 'code') VALUES (2, 'bot', 0, '', 'Right Frame Bottom');
+INSERT INTO PREFIX_filetypes ('filetype', 'force_thumb') VALUES ('jpg', 0);
+INSERT INTO PREFIX_filetypes ('filetype', 'force_thumb') VALUES ('gif', 0);
+INSERT INTO PREFIX_filetypes ('filetype', 'force_thumb') VALUES ('png', 0) ;
+INSERT INTO PREFIX_events ('name', 'at') VALUES ('pingback', 0);
+INSERT INTO PREFIX_events ('name', 'at') VALUES ('sitemap', 0);
+INSERT INTO PREFIX_embeds ('filetype', 'name', 'videourl', 'width', 'height', 'code') VALUES ('you', 'Youtube', 'http://www.youtube.com/watch?v=', 200, 164, '<object type="application/x-shockwave-flash" width="SET_WIDTH" height="SET_HEIGHT" data="http://www.youtube.com/v/EMBED_ID"> <param name="movie" value="http://www.youtube.com/v/EMBED_ID" /> </object>');
+INSERT INTO PREFIX_embeds ('filetype', 'name', 'videourl', 'width', 'height', 'code') VALUES ('goo', 'Google', 'http://video.google.com/videoplay?docid=', 200, 164, '<embed width="SET_WIDTH" height="SET_HEIGHT" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=EMBED_ID"></embed>');
