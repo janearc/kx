@@ -19,13 +19,12 @@ CREATE TABLE PREFIX_ads (
 --
 
 CREATE TABLE PREFIX_announcements (
-  id serial,
+  id serial primary key,
   parentid int NOT NULL default '0',
   subject varchar(255) NOT NULL,
   postedat int NOT NULL,
   postedby varchar(75) NOT NULL,
-  message text NOT NULL,
-  PRIMARY KEY (id)
+  message text NOT NULL
 );
 
 -- --------------------------------------------------------
@@ -35,7 +34,7 @@ CREATE TABLE PREFIX_announcements (
 --
 
 CREATE TABLE PREFIX_banlist (
-  id serial,
+  id serial primary key,
   type smallint NOT NULL default '0',
   expired smallint NOT NULL default '0',
   allowread smallint NOT NULL default '1',
@@ -49,8 +48,7 @@ CREATE TABLE PREFIX_banlist (
   reason text NOT NULL,
   staffnote text NOT NULL,
   appeal text NOT NULL default '',
-  appealat int NOT NULL default'0',
-  PRIMARY KEY (id)
+  appealat int NOT NULL default'0'
 );
 
 -- --------------------------------------------------------
@@ -60,11 +58,10 @@ CREATE TABLE PREFIX_banlist (
 --
 
 CREATE TABLE PREFIX_bannedhashes (
-  id serial,
+  id serial primary key,
   md5 varchar(255) NOT NULL,
   bantime int,
-  description text NOT NULL,
-  UNIQUE (id)
+  description text NOT NULL
 );
 
 -- --------------------------------------------------------
@@ -74,11 +71,10 @@ CREATE TABLE PREFIX_bannedhashes (
 --
 
 CREATE TABLE PREFIX_blotter (
-  id serial,
+  id serial primary key,
   important smallint NOT NULL,
   at int NOT NULL,
-  message text NOT NULL,
-  PRIMARY KEY (id)
+  message text NOT NULL
 );
 
 -- --------------------------------------------------------
@@ -88,13 +84,13 @@ CREATE TABLE PREFIX_blotter (
 --
 
 CREATE TABLE PREFIX_boards (
-  id serial,
-  `order` smallint,
+  id serial primary key,
+  'order' smallint,
   name varchar(75) NOT NULL default '',
   type smallint NOT NULL default '0',
   start int NOT NULL,
   uploadtype smallint,
-  `desc` varchar(75) NOT NULL default '',
+  'desc' varchar(75) NOT NULL default '',
   image varchar(255) NOT NULL,
   section smallint NOT NULL default '0',
   maximagesize int NOT NULL default '1024000',
@@ -122,8 +118,7 @@ CREATE TABLE PREFIX_boards (
   enablearchiving smallint NOT NULL default '0',
   enablecatalog smallint NOT NULL default '1',
   loadbalanceurl varchar(255) NOT NULL default '',
-  loadbalancepassword varchar(255) NOT NULL default '',
-  PRIMARY KEY (id)
+  loadbalancepassword varchar(255) NOT NULL default ''
 );
 
 --
@@ -142,14 +137,13 @@ CREATE TABLE PREFIX_board_filetypes (
 --
 
 CREATE TABLE PREFIX_embeds (
-  id serial,
+  id serial primary key,
   filetype varchar(3) NOT NULL,
   name varchar(255) NOT NULL,
   videourl varchar(510) NOT NULL,
   width smallint NOT NULL,
   height smallint NOT NULL,
-  code text NOT NULL,
-  PRIMARY KEY (id)
+  code text NOT NULL
 );
 
 -- --------------------------------------------------------
@@ -170,14 +164,13 @@ CREATE TABLE PREFIX_events (
 --
 
 CREATE TABLE PREFIX_filetypes (
-  id serial,
+  id serial primary key,
   filetype varchar(255) NOT NULL,
   mime varchar(255) NOT NULL default '',
   image varchar(255) NOT NULL default '',
   image_w int NOT NULL default '0',
   image_h int NOT NULL default '0',
-  force_thumb int NOT NULL default '1',
-  PRIMARY KEY (id)
+  force_thumb int NOT NULL default '1'
 );
 
 -- --------------------------------------------------------
@@ -187,15 +180,14 @@ CREATE TABLE PREFIX_filetypes (
 --
 
 CREATE TABLE PREFIX_front (
-	id serial,
+	id serial primary key,
 	page smallint NOT NULL default '0',
-	`order` smallint NOT NULL default '0',
+	'order' smallint NOT NULL default '0',
 	subject varchar(255) NOT NULL,
 	message text NOT NULL,
 	timestamp int NOT NULL default '0',
 	poster varchar(75) NOT NULL default '',
-	email varchar(255) NOT NULL default '',
-	PRIMARY KEY (id)
+	email varchar(255) NOT NULL default ''
 );
 
 -- --------------------------------------------------------
@@ -218,7 +210,7 @@ CREATE TABLE PREFIX_loginattempts (
 
 CREATE TABLE PREFIX_modlog (
   entry text NOT NULL,
-  `user` varchar(255) NOT NULL,
+  'user' varchar(255) NOT NULL,
   category smallint NOT NULL default '0',
   timestamp int NOT NULL
 );
@@ -243,8 +235,8 @@ CREATE TABLE PREFIX_module_settings (
 --
 
 CREATE TABLE PREFIX_posts (
-  id int NOT NULL,
-  boardid smallint NOT NULL,
+  id int NOT NULL primary key,
+  boardid smallint NOT NULL distinct,
   parentid int NOT NULL default '0',
   name varchar(255) NOT NULL,
   tripcode varchar(30) NOT NULL,
@@ -272,8 +264,7 @@ CREATE TABLE PREFIX_posts (
   reviewed smallint NOT NULL default '0',
   deleted_timestamp int NOT NULL default '0',
   IS_DELETED smallint NOT NULL default '0',
-  bumped int NOT NULL default '0',
-  PRIMARY KEY (boardid, id)
+  bumped int NOT NULL default '0'
 );
   CREATE OR REPLACE FUNCTION posts_update()
     RETURNS "trigger" AS
@@ -290,6 +281,8 @@ CREATE TABLE PREFIX_posts (
   CREATE INDEX file_md5 On PREFIX_posts (file_md5);
   CREATE INDEX stickied ON PREFIX_posts (stickied);
 
+create unique index boardid_idx on PREFIX_posts (boardid);
+
 -- --------------------------------------------------------
 
 --
@@ -297,14 +290,13 @@ CREATE TABLE PREFIX_posts (
 --
 
 CREATE TABLE PREFIX_reports (
-  id serial,
+  id serial primary key,
   cleared smallint NOT NULL default '0',
   board varchar(255) NOT NULL,
   postid int NOT NULL,
-  `when` int NOT NULL,
+  'when' int NOT NULL,
   ip varchar(75) NOT NULL,
-  reason varchar(255) NOT NULL,
-  PRIMARY KEY (id)
+  reason varchar(255) NOT NULL
 );
 
 -- --------------------------------------------------------
@@ -314,12 +306,11 @@ CREATE TABLE PREFIX_reports (
 --
 
 CREATE TABLE PREFIX_sections (
-  id serial,
-  `order` smallint,
+  id serial primary key,
+  'order' smallint,
   hidden smallint NOT NULL default '0',
   name varchar(255) NOT NULL NOT NULL default '0',
-  abbreviation varchar(10) NOT NULL,
-  PRIMARY KEY (id)
+  abbreviation varchar(10) NOT NULL
 );
 
 -- --------------------------------------------------------
@@ -329,15 +320,14 @@ CREATE TABLE PREFIX_sections (
 --
 
 CREATE TABLE PREFIX_staff (
-  id serial,
+  id serial primary key,
   username varchar(255) NOT NULL,
   password varchar(255) NOT NULL,
   salt varchar(3) NOT NULL,
   type smallint NOT NULL default '0',
   boards text,
   addedon int NOT NULL,
-  lastactive int NOT NULL default '0',
-  PRIMARY KEY (id)
+  lastactive int NOT NULL default '0'
 );
 
 -- --------------------------------------------------------
@@ -347,12 +337,11 @@ CREATE TABLE PREFIX_staff (
 --
 
 CREATE TABLE PREFIX_watchedthreads (
-  id serial,
+  id serial primary key,
   threadid int NOT NULL,
   board varchar(255) NOT NULL,
   ip char(15) NOT NULL,
-  lastsawreplyid int NOT NULL,
-  PRIMARY KEY (id)
+  lastsawreplyid int NOT NULL
 );
 
 -- --------------------------------------------------------
@@ -362,25 +351,24 @@ CREATE TABLE PREFIX_watchedthreads (
 --
 
 CREATE TABLE PREFIX_wordfilter (
-  id serial,
+  id serial primary key,
   word varchar(75) NOT NULL,
   replacedby varchar(75) NOT NULL,
   boards text NOT NULL,
   time int NOT NULL,
-  regex smallint NOT NULL default '0',
-  PRIMARY KEY (id)
+  regex smallint NOT NULL default '0'
 );
 
 
 CREATE OR REPLACE FUNCTION "if"(boolean, integer, integer) RETURNS integer AS
       'SELECT CASE WHEN $1 THEN $2 ELSE $3 END:semicolon:'
       LANGUAGE 'sql';
-INSERT INTO `PREFIX_ads` (`id`, `position`, `disp`, `boards`, `code`) VALUES (1, 'top', 0, '', 'Right Frame Top');
-INSERT INTO `PREFIX_ads` (`id`, `position`, `disp`, `boards`, `code`) VALUES (2, 'bot', 0, '', 'Right Frame Bottom');
-INSERT INTO `PREFIX_filetypes` (`filetype`, `force_thumb`) VALUES ('jpg', 0);
-INSERT INTO `PREFIX_filetypes` (`filetype`, `force_thumb`) VALUES ('gif', 0);
-INSERT INTO `PREFIX_filetypes` (`filetype`, `force_thumb`) VALUES ('png', 0) ;
-INSERT INTO `PREFIX_events` (`name`, `at`) VALUES ('pingback', 0);
-INSERT INTO `PREFIX_events` (`name`, `at`) VALUES ('sitemap', 0);
-INSERT INTO `PREFIX_embeds` (`filetype`, `name`, `videourl`, `width`, `height`, `code`) VALUES ('you', 'Youtube', 'http://www.youtube.com/watch?v=', 200, 164, '<object type="application/x-shockwave-flash" width="SET_WIDTH" height="SET_HEIGHT" data="http://www.youtube.com/v/EMBED_ID"> <param name="movie" value="http://www.youtube.com/v/EMBED_ID" /> </object>');
-INSERT INTO `PREFIX_embeds` (`filetype`, `name`, `videourl`, `width`, `height`, `code`) VALUES ('goo', 'Google', 'http://video.google.com/videoplay?docid=', 200, 164, '<embed width="SET_WIDTH" height="SET_HEIGHT" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=EMBED_ID"></embed>');
+INSERT INTO 'PREFIX_ads' ('id', 'position', 'disp', 'boards', 'code') VALUES (1, 'top', 0, '', 'Right Frame Top');
+INSERT INTO 'PREFIX_ads' ('id', 'position', 'disp', 'boards', 'code') VALUES (2, 'bot', 0, '', 'Right Frame Bottom');
+INSERT INTO 'PREFIX_filetypes' ('filetype', 'force_thumb') VALUES ('jpg', 0);
+INSERT INTO 'PREFIX_filetypes' ('filetype', 'force_thumb') VALUES ('gif', 0);
+INSERT INTO 'PREFIX_filetypes' ('filetype', 'force_thumb') VALUES ('png', 0) ;
+INSERT INTO 'PREFIX_events' ('name', 'at') VALUES ('pingback', 0);
+INSERT INTO 'PREFIX_events' ('name', 'at') VALUES ('sitemap', 0);
+INSERT INTO 'PREFIX_embeds' ('filetype', 'name', 'videourl', 'width', 'height', 'code') VALUES ('you', 'Youtube', 'http://www.youtube.com/watch?v=', 200, 164, '<object type="application/x-shockwave-flash" width="SET_WIDTH" height="SET_HEIGHT" data="http://www.youtube.com/v/EMBED_ID"> <param name="movie" value="http://www.youtube.com/v/EMBED_ID" /> </object>');
+INSERT INTO 'PREFIX_embeds' ('filetype', 'name', 'videourl', 'width', 'height', 'code') VALUES ('goo', 'Google', 'http://video.google.com/videoplay?docid=', 200, 164, '<embed width="SET_WIDTH" height="SET_HEIGHT" id="VideoPlayback" type="application/x-shockwave-flash" src="http://video.google.com/googleplayer.swf?docId=EMBED_ID"></embed>');
